@@ -1,0 +1,32 @@
+{
+  "name": "drone-tello-backend",
+  "version": "1.0.0",
+  "description": "backend to maage drone tello",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/MarcoTerzolo/drone-tello-backend.git"
+  },
+  "keywords": [
+    "iot",
+    "drone",
+    "javascript"
+  ],
+  "author": "Marco Terzolo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/MarcoTerzolo/drone-tello-backend/issues"
+  },
+  "homepage": "https://gitlab.com/MarcoTerzolo/drone-tello-backend#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "waait": "^1.0.2",
+    "yarn": "^1.12.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.9"
+  }
+}
