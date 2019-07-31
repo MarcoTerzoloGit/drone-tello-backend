@@ -16,11 +16,12 @@ const commandDelays = {
      'back':  5000,
      'cw':  5000,
      'ccw':  5000,
-     'flip l':  3000, 
+     'flip':  3000, 
      'speed':  3000,
      'battery?':  500, 
      'speed?':  500,
-     'time?':  500 
+     'time?':  500,
+     'streamon': 5000 
 
 }
 

@@ -6,7 +6,9 @@ const commandDelays = require('./commandDelays.js');
 const PORTS = {
     DRONE_COMMANDS_PORT: 8889,
     DRONE_STATUS_PORT: 8890,
+    DRONE_STREAM_VIDEO_PORT: 11111
 }
+
 const HOST = '192.168.10.1'; 
 
 // Socket for drone controls
@@ -17,6 +19,13 @@ drone.bind(PORTS.DRONE_COMMANDS_PORT);
 droneStatus.bind(PORTS.DRONE_STATUS_PORT); */
 
 
+const droneStreaming = dgram.createSocket('udp4');
+droneStreaming.bind(PORTS.DRONE_STREAM_VIDEO_PORT);
+
+droneStreaming.on('message', (streaming) => console.log(`streaming from drone >>> ${streaming}`));
+
+
+
 
 // drone commands
 drone.on('message', (message) => console.log(`message from drone >>> ${message}`));
@@ -24,42 +33,56 @@ drone.on('message', (message) => console.log(`message from drone >>> ${message}`
 /* droneStatus.on('message', (message) => console.log(`status >>> ${message}`)); */
 
 
+const returnCompositeCommand = (index, commandList) => {
+    const command = commandList[index][0];
+    const value = commandList[index][1] ? ` ${commandList[index][1]}`: '';
+    const delay = commandDelays[command];
+
+    return {
+        action: `${command}${value}`,
+        delay
+    };
+}
 
 const commands = [ 
-    'command', 
-    'battery?',
-    'takeoff',
-    'flip l',
-    'land'
+    ['command'], 
+    ['battery?'],
+    ['streamon'],
+    // ['takeoff'],
+    // ['forward', '50'],
+    // ['flip', 'l'],
+    // ['flip', 'r'],
+    // ['back', '50'],
+    // ['land']
 ]
+
 let i = 0;
-
-
 
 /**
  * loop to handle the commands sent to drone
  */
 async function runDronePrograms() {
     
-    const command = commands[i];
-    const delay = commandDelays[command];
-    console.log(`running drone program >>> ${command}`);
+    const compositeCommand = returnCompositeCommand(i, commands)
+    
+    
+    console.log(`running drone program >>> ${compositeCommand.action}<`);
     
     drone.send(
-        command,
+        compositeCommand.action,
         0,
-        command.length,
+        compositeCommand.action.length,
         PORTS.DRONE_COMMANDS_PORT,
         HOST,
         handleError
     );
     
-    await wait(delay);
+    await wait(compositeCommand.delay);
     i++;
     if (i < commands.length){
         return runDronePrograms();
     }
-    console.log(`all command's done, last executed command was >>> ${command}`)
+    console.log(`all command's done, last executed command was >>> ${compositeCommand.action}`)
 }
 
 runDronePrograms();
@@ -71,7 +94,7 @@ runDronePrograms();
  * @param {*} error 
  */
 function handleError(error){
-    if(error){
+    if(error === 'error'){
         console.log('>>error<<');
         console.log(error);
         console.log('>>>end<<<')
