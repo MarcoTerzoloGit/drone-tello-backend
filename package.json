@@ -22,7 +22,7 @@
   },
   "homepage": "https://gitlab.com/MarcoTerzolo/drone-tello-backend#readme",
   "dependencies": {
-    "express": "^4.16.4",
+    "express": "^4.17.1",
     "waait": "^1.0.2",
     "yarn": "^1.12.3"
   },

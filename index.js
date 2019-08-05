@@ -3,6 +3,10 @@ const wait = require('waait');
 const commandDelays = require('./commandDelays.js');
 
 
+
+
+
+
 const PORTS = {
     DRONE_COMMANDS_PORT: 8889,
     DRONE_STATUS_PORT: 8890,
@@ -22,8 +26,10 @@ droneStatus.bind(PORTS.DRONE_STATUS_PORT); */
 const droneStreaming = dgram.createSocket('udp4');
 droneStreaming.bind(PORTS.DRONE_STREAM_VIDEO_PORT);
 
-droneStreaming.on('message', (streaming) => console.log(`streaming from drone >>> ${streaming}`));
+let currentStream;
+droneStreaming.on('message', (streaming) => /* console.log(`streaming from drone >>> ${streaming}`) ||  */ currentStream = streaming);
 
+console.log('currentStream', currentStream)
 
 
 
@@ -110,3 +116,47 @@ function handleError(error){
 }
 
 
+
+
+
+//// SERVER
+
+const express = require('express')
+
+const server = express()
+
+server.listen(9700, () => console.log('Example app listening on port 3000!' ))
+
+server.get('/', (req, res) => 
+
+res.send(
+`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div className="App">
+            
+        <p>
+            IO SONO LA APP
+        </p>
+
+        <video id="videoPlayer" controls>
+            <source src="http://localhost:9700/welcome" type="video/mp4" />
+        </video>
+    </div>
+    
+</body>
+</html>
+`)
+)
+
+server.get('/welcome', (req, res) =>  {
+    console.log('someone connected to welcome >>>>>')
+    res.send(currentStream)
+})
