@@ -23,13 +23,11 @@ drone.bind(PORTS.DRONE_COMMANDS_PORT);
 droneStatus.bind(PORTS.DRONE_STATUS_PORT); */
 
 
-const droneStreaming = dgram.createSocket('udp4');
-droneStreaming.bind(PORTS.DRONE_STREAM_VIDEO_PORT);
+// const droneStreaming = dgram.createSocket('udp4');
+// droneStreaming.bind(PORTS.DRONE_STREAM_VIDEO_PORT);
 
-let currentStream;
-droneStreaming.on('message', (streaming) => /* console.log(`streaming from drone >>> ${streaming}`) ||  */ currentStream = streaming);
 
-console.log('currentStream', currentStream)
+// droneStreaming.on('message', (streaming) => console.log(`streaming from drone >>> `)); // ${streaming}
 
 
 
@@ -121,42 +119,87 @@ function handleError(error){
 
 //// SERVER
 
-const express = require('express')
 
-const server = express()
 
-server.listen(9700, () => console.log('Example app listening on port 3000!' ))
+const cv = require('opencv4nodejs');
+const path = require('path');
+const express = require('express');
+const app = express();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
 
-server.get('/', (req, res) => 
 
-res.send(
-`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-</head>
-<body>
-    <div className="App">
-            
-        <p>
-            IO SONO LA APP
-        </p>
 
-        <video id="videoPlayer" controls>
-            <source src="http://localhost:9700/welcome" type="video/mp4" />
-        </video>
-    </div>
-    
-</body>
-</html>
-`)
-)
 
-server.get('/welcome', (req, res) =>  {
-    console.log('someone connected to welcome >>>>>')
-    res.send(currentStream)
-})
+setTimeout(() => {
+
+
+// config
+const FPS = 30;
+
+// get camera ID
+// const wCap = new cv.VideoCapture(0)
+
+// test to get drone cam
+const attempts = [
+	// 'rtps://192.168.10.1:11111',
+	// 'rtps://0.0.0.0:11111',
+
+	'udp://192.168.10.1:11111',
+	// 'udp://0.0.0.0:11111',
+
+	// 'udp://@192.168.10.1:11111',
+	// 'udp://@0.0.0.0:11111',
+
+	// '192.168.10.1:11111',
+	// '0.0.0.0:11111',
+
+	// 'udp://@:11111',
+
+	// 'udp://192.168.10.1:11111/',
+	// 'udp://192.168.10.1:11111/video.h264',
+
+	// 'udp://@192.168.10.1'
+	
+
+
+];
+
+// attempts.forEach((item) => {
+// 	try{
+// 		const wCap = new cv.VideoCapture(item, cv.CAP_FFMPEG)
+// 		console.log('wCap', wCap)
+// 	} catch(e) {
+// 		console.log('e', e)
+// 	}
+// })
+
+const wCap = new cv.VideoCapture('udp://192.168.10.1:11111', cv.CAP_FFMPEG)
+
+// resize
+// wCap.set(cv.CAP_PROP_FRAME_WIDTH, 300);
+// wCap.set(cv.CAP_PROP_FRAME_HEIGHT, 300);
+
+
+server.listen(9700, () => console.log('Example app listening on port 9700!' ));
+
+app.get('/', (req, res) => 
+	res.sendFile(path.join(__dirname, './public/index.html'))
+);
+
+setInterval(() => {
+
+	const frame = wCap.read();
+	const image = cv.imencode('.jpg', frame).toString('base64');
+
+
+  io.emit('image', image)
+}, 100);
+
+}, 7000)
+
+
+
+
+
+// ffplay -probesize 32 -i udp://@192.168.10.1:11111 -framerate 30

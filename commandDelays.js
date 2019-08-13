@@ -21,7 +21,7 @@ const commandDelays = {
      'battery?':  500, 
      'speed?':  500,
      'time?':  500,
-     'streamon': 5000 
+     'streamon': 5000
 
 }
 

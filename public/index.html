@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Drone control panel</title>
+</head>
+<body>
+    <div className="App">
+            
+        <p>
+            IO SONO LA APP
+        </p>
+
+        <img id="image">
+
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+        <script>
+					const socket = io.connect('http://127.0.0.1:9700');
+					socket.on('image', (frame) => {
+						console.log('IMAGE INCOMING')
+
+						const image = document.getElementById('image');
+						image.src = `data:image/jpeg;base64,${frame}`;
+
+
+					})
+        </script>
+        
+       
+    </div>
+    
+</body>
+</html>
