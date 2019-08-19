@@ -19,22 +19,28 @@ const HOST = '192.168.10.1';
 const drone = dgram.createSocket('udp4');
 drone.bind(PORTS.DRONE_COMMANDS_PORT);
 
-/* const droneStatus = dgram.createSocket('udp4');
-droneStatus.bind(PORTS.DRONE_STATUS_PORT); */
-
+// drone status
+const droneStatus = dgram.createSocket('udp4');
+droneStatus.bind(PORTS.DRONE_STATUS_PORT);
+droneStatus.on('message', (message) => {
+	const parsedMessage = `${message}`
+	.split(';')
+	.map(item => item.split(':'))
+	.reduce((acc, cur) => {
+		acc[cur[0]] = cur[1];
+		return acc;
+	}, {})
+	console.log(`parsed message from drone >>> `, parsedMessage);
+})
 
 // const droneStreaming = dgram.createSocket('udp4');
 // droneStreaming.bind(PORTS.DRONE_STREAM_VIDEO_PORT);
-
-
 // droneStreaming.on('message', (streaming) => console.log(`streaming from drone >>> `)); // ${streaming}
 
 
 
 // drone commands
 drone.on('message', (message) => console.log(`message from drone >>> ${message}`));
-// drone status
-/* droneStatus.on('message', (message) => console.log(`status >>> ${message}`)); */
 
 
 const returnCompositeCommand = (index, commandList) => {
@@ -51,7 +57,7 @@ const returnCompositeCommand = (index, commandList) => {
 const commands = [ 
     ['command'], 
     ['battery?'],
-    ['streamon'],
+    // ['streamon'],
     // ['takeoff'],
     // ['forward', '50'],
     // ['flip', 'l'],
@@ -133,48 +139,10 @@ const io = require('socket.io')(server);
 
 setTimeout(() => {
 
-
 // config
 const FPS = 30;
 
-// get camera ID
-// const wCap = new cv.VideoCapture(0)
-
-// test to get drone cam
-const attempts = [
-	// 'rtps://192.168.10.1:11111',
-	// 'rtps://0.0.0.0:11111',
-
-	'udp://192.168.10.1:11111',
-	// 'udp://0.0.0.0:11111',
-
-	// 'udp://@192.168.10.1:11111',
-	// 'udp://@0.0.0.0:11111',
-
-	// '192.168.10.1:11111',
-	// '0.0.0.0:11111',
-
-	// 'udp://@:11111',
-
-	// 'udp://192.168.10.1:11111/',
-	// 'udp://192.168.10.1:11111/video.h264',
-
-	// 'udp://@192.168.10.1'
-	
-
-
-];
-
-// attempts.forEach((item) => {
-// 	try{
-// 		const wCap = new cv.VideoCapture(item, cv.CAP_FFMPEG)
-// 		console.log('wCap', wCap)
-// 	} catch(e) {
-// 		console.log('e', e)
-// 	}
-// })
-
-const wCap = new cv.VideoCapture('udp://192.168.10.1:11111', cv.CAP_FFMPEG)
+// const wCap = new cv.VideoCapture('udp://192.168.10.1:11111', cv.CAP_FFMPEG)
 
 // resize
 // wCap.set(cv.CAP_PROP_FRAME_WIDTH, 300);
@@ -187,19 +155,76 @@ app.get('/', (req, res) =>
 	res.sendFile(path.join(__dirname, './public/index.html'))
 );
 
+io.on('connection', (socket) => {
+ console.log('socket.id', socket.id)
+})
+
+setInterval(() => {
+	// const frame = wCap.read();
+	// const image = cv.imencode('.jpg', frame).toString('base64');
+	// io.emit('image', image)
+
+}, 1000);
+
 setInterval(() => {
 
-	const frame = wCap.read();
-	const image = cv.imencode('.jpg', frame).toString('base64');
+	const stats = {
+		pitch: 'try',
+		roll: 'try',
+		yaw: 'test',
+		height: 'try',
+	}
+
+  io.emit('stats', stats)
+}, 1000);
 
 
-  io.emit('image', image)
-}, 100);
-
-}, 7000)
+}, 1000)
 
 
 
 
 
 // ffplay -probesize 32 -i udp://@192.168.10.1:11111 -framerate 30
+
+// const fs = require('fs');
+// const { Transform } = require('stream');
+
+// const readStream = fs.createReadStream("./testi/file.txt", {
+//     encoding: 'utf8', // codifica
+//     highWaterMark: 16 // grandezza massima del buffer (usato internamente)
+// });
+
+// const writeStream = fs.createWriteStream('./testi/file3.txt');
+
+// const upperCaseTransformStream = new Transform({
+//     transform(chunk, encoding, done) {
+//         this.push(chunk.toString().toUpperCase());
+//         done();
+//     }
+// });
+
+
+// readStream.pipe(upperCaseTransformStream).pipe(writeStream);
+
+// /*
+// (async () => {
+
+//     for await (const chunk of readStream) {
+
+//         process.stdout.write(chunk.toString().toUpperCase());
+//         writeStream.write(chunk.toString().toUpperCase());
+//     }
+
+// })();*/
+
+
+// /*
+
+// const readStream = fs.createReadStream('./video/testVideo.mp4');
+
+// const newFile = fs.createWriteStream('./video/test2.mp4');*/
+
+
+// // readStream.pipe(newFile);
+
