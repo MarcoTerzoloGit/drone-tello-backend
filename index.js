@@ -1,7 +1,18 @@
+// DRONE
 const dgram = require('dgram');
 const wait = require('waait');
 const commandDelays = require('./commandDelays.js');
 
+//// SERVER
+const cv = require('opencv4nodejs');
+const path = require('path');
+const express = require('express');
+const app = express();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+
+// OTHER
+const throttle = require('./throttle')
 
 
 
@@ -23,6 +34,9 @@ drone.bind(PORTS.DRONE_COMMANDS_PORT);
 const droneStatus = dgram.createSocket('udp4');
 droneStatus.bind(PORTS.DRONE_STATUS_PORT);
 droneStatus.on('message', (message) => {
+
+  // TODO: to be throttled
+
 	const parsedMessage = `${message}`
 	.split(';')
 	.map(item => item.split(':'))
@@ -30,7 +44,9 @@ droneStatus.on('message', (message) => {
 		acc[cur[0]] = cur[1];
 		return acc;
 	}, {})
-	console.log(`parsed message from drone >>> `, parsedMessage);
+	// console.log(`parsed message from drone >>> `, parsedMessage);
+
+	io.emit('stats', parsedMessage)
 })
 
 // const droneStreaming = dgram.createSocket('udp4');
@@ -57,7 +73,7 @@ const returnCompositeCommand = (index, commandList) => {
 const commands = [ 
     ['command'], 
     ['battery?'],
-    // ['streamon'],
+    ['streamon'],
     // ['takeoff'],
     // ['forward', '50'],
     // ['flip', 'l'],
@@ -123,31 +139,9 @@ function handleError(error){
 
 
 
-//// SERVER
-
-
-
-const cv = require('opencv4nodejs');
-const path = require('path');
-const express = require('express');
-const app = express();
-const server = require('http').Server(app);
-const io = require('socket.io')(server);
-
-
-
-
-setTimeout(() => {
-
-// config
-const FPS = 30;
-
-// const wCap = new cv.VideoCapture('udp://192.168.10.1:11111', cv.CAP_FFMPEG)
-
-// resize
-// wCap.set(cv.CAP_PROP_FRAME_WIDTH, 300);
-// wCap.set(cv.CAP_PROP_FRAME_HEIGHT, 300);
-
+io.on('connection', (socket) => {
+	console.log('socket.id', socket.id)
+})
 
 server.listen(9700, () => console.log('Example app listening on port 9700!' ));
 
@@ -155,31 +149,32 @@ app.get('/', (req, res) =>
 	res.sendFile(path.join(__dirname, './public/index.html'))
 );
 
-io.on('connection', (socket) => {
- console.log('socket.id', socket.id)
-})
+setTimeout(() => {
 
-setInterval(() => {
-	// const frame = wCap.read();
-	// const image = cv.imencode('.jpg', frame).toString('base64');
-	// io.emit('image', image)
+	// config
+	const FPS = 30;
 
-}, 1000);
+	const wCap = new cv.VideoCapture('udp://192.168.10.1:11111')
 
-setInterval(() => {
+	wCap.set(cv.CAP_PROP_BUFFERSIZE, 3);
+	wCap.set(cv.CAP_PROP_POS_FRAMES, 500);
 
-	const stats = {
-		pitch: 'try',
-		roll: 'try',
-		yaw: 'test',
-		height: 'try',
-	}
+	// resize
+	wCap.set(cv.CAP_PROP_FRAME_WIDTH, 450);
+	wCap.set(cv.CAP_PROP_FRAME_HEIGHT, 300);
 
-  io.emit('stats', stats)
-}, 1000);
+	setInterval(() => {
+		try {
+			const frame = wCap.read();
+			const image = cv.imencode('.jpg', frame).toString('base64');
+			io.emit('image', image)
+		} catch (error) {
+			console.log('error', error)
+		}
+		
+	}, 100);
 
-
-}, 1000)
+}, 7000)
 
 
 
