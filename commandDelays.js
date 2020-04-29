@@ -5,6 +5,7 @@
 const commandDelays = {
 
      'command':  500,
+     
      'takeoff':  5000,
      'land':  5000,
      'up':  7000,
@@ -21,6 +22,8 @@ const commandDelays = {
      'battery?':  500, 
      'speed?':  500,
      'time?':  500,
+
+
      'streamon': 5000
 
 }
