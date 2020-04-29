@@ -4,9 +4,12 @@ const DronePorts = {
   STREAM_VIDEO_PORT: 11111
 }
 
-const HOST = '192.168.10.1'; 
+const HOST = '192.168.10.1';
+
+const PORT = 9700
 
 module.exports = {
   DronePorts,
-  HOST
+  HOST,
+  PORT
 }
