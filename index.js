@@ -7,7 +7,8 @@ const DroneManager = require('./droneManager');
 const { PORT } = require('./constants')
 
 
-console.log('DroneManager', new DroneManager())
+const droneInstance = new DroneManager(); 
+console.log('DroneManager', droneInstance);
 
 io.on('connection', (socket) => {
     console.log('socket.id', socket.id)
@@ -20,6 +21,8 @@ io.on('connection', (socket) => {
       'command', 
       res => {
         console.log('COMMAND', res)
+
+        droneInstance.sendCommand()
         
       }
     )

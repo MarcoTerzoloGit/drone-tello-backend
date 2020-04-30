@@ -6,13 +6,60 @@ const { parseMessage } = require('./utils');
 class DroneManager {
 	constructor() {
 		this.initCommandsConnection()
-		this.initStatusConnection()
-		this.initStreamingConnection()
+		// this.initStatusConnection()
+		// this.initStreamingConnection()
 	}
 
   initCommandsConnection() {
-		this.droneCommands = dgram.createSocket('udp4', (msg, info) => console.log('[UDP]', msg, info));
-		this.droneCommands.bind(DronePorts.COMMANDS_PORT);
+		try {
+			this.droneCommands = dgram.createSocket('udp4'/* , (msg, info) => console.log('[UDP]', msg, info) */);
+			this.droneCommands.bind(DronePorts.COMMANDS_PORT);
+
+			this.droneCommands.on('connect', () => {
+				console.log(`[UDP] connected`);
+			});
+
+			this.droneCommands.on('error', () => {
+				console.log(`[UDP] error`);
+			});
+
+			this.droneCommands.on('listening', () => {
+				var address = this.droneCommands.address();
+				console.log(`[UDP] listening on ${address.address}:${address.port}`);
+			});
+
+			this.droneCommands.on('message', (message) => console.log(`[DRONE] >>> ${message}`));
+
+
+    } catch(e) {
+		console.log('connection error', e)
+		}		
+
+
+		// setTimeout(() => {
+		// 	this.droneCommands.send(
+		// 		'command',
+		// 		0,
+		// 		7,
+		// 		DronePorts.COMMANDS_PORT,
+		// 		HOST,
+		// 		this.handleError.bind(this) // TODO handle emergency FE side
+		// 	);
+		// }, 10000)
+
+		// setTimeout(() => {
+		// 	this.droneCommands.send(
+		// 		'command',
+		// 		0,
+		// 		7,
+		// 		DronePorts.COMMANDS_PORT,
+		// 		HOST,
+		// 		this.handleError.bind(this) // TODO handle emergency FE side
+		// 	);
+		// }, 5000)
+
+		
+
 	}
 	
 	initStatusConnection() {
@@ -72,31 +119,52 @@ class DroneManager {
 		// }, 7000)
 	}
 
-	sendCommand(commmand, errorCallback) {
-		this.drone.send(
-			commmand,
-			0,
-			commmand.length,
-			DronePorts.COMMANDS_PORT,
-			HOST,
-			this.handleError.bind(this) // TODO handle emergency FE side
-		);
+	sendCommand(command, errorCallback) {
+
+		setTimeout(() => {
+			this.droneCommands.send(
+				'command',
+				0,
+				7,
+				DronePorts.COMMANDS_PORT,
+				HOST,
+				this.handleError.bind(this) // TODO handle emergency FE side
+			);
+		}, 2000)
+		// setTimeout(() => {
+		// 	this.droneCommands.send(
+		// 		'takeoff',
+		// 		0,
+		// 		7,
+		// 		DronePorts.COMMANDS_PORT,
+		// 		HOST,
+		// 		this.handleError.bind(this) // TODO handle emergency FE side
+		// 	);
+		// }, 10000)
+		// this.droneCommands.send(
+		// 	command,
+		// 	0,
+		// 	command.length,
+		// 	DronePorts.COMMANDS_PORT,
+		// 	HOST,
+		// 	this.handleError.bind(this) // TODO handle emergency FE side
+		// );
 	}
 
 	handleError(error){
-			if(error === 'error'){
-					console.log('[DRONE] error', error);
-					this.droneCommands.send(
-							'emergency', // TODO put in constants
-							0,
-							9,
-							DronePorts.COMMANDS_PORT,
-							HOST,
-							() => console.log('[DRONE][EMERGENCY] failed')
-					)
-			} else {
+		if(error === 'error'){
 				console.log('[DRONE] error', error);
-			}
+				this.droneCommands.send(
+						'emergency', // TODO put in constants
+						0,
+						9,
+						DronePorts.COMMANDS_PORT,
+						HOST,
+						() => console.log('[DRONE][EMERGENCY] failed')
+				)
+		} else {
+			console.log('[DRONE] has error?', error);
+		}
 	}
 }
 
