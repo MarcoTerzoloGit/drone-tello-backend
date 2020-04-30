@@ -24,6 +24,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "opencv4nodejs": "^5.1.0",
+    "rxjs": "^6.5.5",
     "socket.io": "^2.2.0"
   },
   "devDependencies": {
