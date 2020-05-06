@@ -93,43 +93,7 @@ class DroneManager {
 	}
 
 	sendCommand(command, errorCallback) {
-		console.log('RECEIVED AND READY TO BE SENT TO DRONE', command)
-	// 	this.droneCommands.send(
-	// 		'command',
-	// 		0,
-	// 		7,
-	// 		DronePorts.COMMANDS_PORT,
-	// 		HOST,
-	// 		this.handleError.bind(this) // TODO handle emergency FE side
-	// 	);
-
-	// 	setTimeout(() => {
-	// 		this.droneCommands.send(
-	// 			'takeoff',
-	// 			0,
-	// 			7,
-	// 			DronePorts.COMMANDS_PORT,
-	// 			HOST,
-	// 			this.handleError.bind(this) // TODO handle emergency FE side
-	// 		);
-			
-	// 	}, 1000)
-
-	// 	setTimeout(() => {
-	// 		this.droneCommands.send(
-	// 			'land',
-	// 			0,
-	// 			4,
-	// 			DronePorts.COMMANDS_PORT,
-	// 			HOST,
-	// 			this.handleError.bind(this) // TODO handle emergency FE side
-	// 		);
-			
-	// 	}, 5000)
-
-
-
-
+		console.log('[COMMANDS] sending eligible:', command)
 
 		this.droneCommands.send(
 			command,
@@ -159,60 +123,3 @@ class DroneManager {
 }
 
 module.exports = DroneManager
-
-
-
-
-// const returnCompositeCommand = (index, commandList) => {
-//     const command = commandList[index][0];
-//     const value = commandList[index][1] ? ` ${commandList[index][1]}`: '';
-//     const delay = commandDelays[command];
-
-//     return {
-//         action: `${command}${value}`,
-//         delay
-//     };
-// }
-
-// const commands = [ 
-//     ['command'], 
-//     ['battery?'],
-//     ['streamon'],
-//     // ['takeoff'],
-//     // ['forward', '50'],
-//     // ['flip', 'l'],
-//     // ['flip', 'r'],
-//     // ['back', '50'],
-//     // ['land']
-// ]
-
-// let i = 0;
-
-// /**
-//  * loop to handle the commands sent to drone
-//  */
-// async function runDronePrograms() {
-    
-//     const compositeCommand = returnCompositeCommand(i, commands)
-    
-    
-//     console.log(`running drone program >>> ${compositeCommand.action}<`);
-    
-//     drone.send(
-//         compositeCommand.action,
-//         0,
-//         compositeCommand.action.length,
-//         PORTS.DRONE_COMMANDS_PORT,
-//         HOST,
-//         handleError
-//     );
-    
-//     await wait(compositeCommand.delay);
-//     i++;
-//     if (i < commands.length){
-//         return runDronePrograms();
-//     }
-//     console.log(`all command's done, last executed command was >>> ${compositeCommand.action}`)
-// }
-
-// runDronePrograms();

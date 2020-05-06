@@ -5,13 +5,17 @@
 
 class SimulatorManager {
   static runSimulator(socketInstance, interval) {
+
+		let yaw = 0;
+		let pitch = 0;
+		let roll = 0;
     setInterval(() => {
 			socketInstance.emit('stats', {
 					bat: Math.random()* 100,
 					h: Math.random()* 100,
-					pitch: Math.random()* 100,
-					roll: Math.random()* 100,
-					yaw: Math.random()* 100,
+					pitch: pitch /* ++ * 0.1 */ /* Math.random()* 100 */,
+					roll: roll /* ++ * 0.1 */ /* Math.random()* 100 */,
+					yaw: yaw /* ++ * 0.1 */ /* Math.random()* 100 */,
 			})
     }, interval);
 	}

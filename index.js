@@ -24,7 +24,7 @@ const droneServiceApp = () => {
       first(), // just to have one client
       concatMap((socket) => {
         console.log('[SOCKET] id:', socket.id)
-        // SimulatorManager.runSimulator(io, 1000);
+        SimulatorManager.runSimulator(io, 100);
 
         return fromEvent(socket, 'command');
       })
