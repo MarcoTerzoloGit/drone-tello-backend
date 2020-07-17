@@ -21,10 +21,11 @@ const droneServiceApp = () => {
   // handle client connection and drone managment
   fromEvent(io, 'connection')
     .pipe(
-      first(), // just to have one client
+      first(), // just to have one client sending commands to drone
       concatMap((socket) => {
         console.log('[SOCKET] id:', socket.id)
-        SimulatorManager.runSimulator(io, 100);
+        // SimulatorManager.runSimulator(io, 100); // Run simulator with generated data
+        SimulatorManager.runSimulatorWithSampleData(io, 100); // run simulator with a sample of real data in loop
 
         return fromEvent(socket, 'command');
       })

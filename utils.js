@@ -11,7 +11,18 @@ const parseMessage = (message = '') => {
   )
 }
 
+const applyCalibration = (data) => {
+  const droneData = {...data}
+
+  droneData.pitch = droneData.pitch === 0 ? 0 : droneData.pitch * 0.5
+  droneData.yaw = droneData.yaw === 0 ? 0 : droneData.yaw * 0.5
+  droneData.roll = droneData.roll === 0 ? 0 : droneData.roll * 0.1
+
+  return droneData;
+}
+
 module.exports = {
   delay,
-  parseMessage
+  parseMessage,
+  applyCalibration
 }

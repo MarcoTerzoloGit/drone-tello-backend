@@ -2,7 +2,7 @@ const dgram = require('dgram');
 const { DronePorts, HOST  } = require('./constants');
 const { parseMessage } = require('./utils');
 const { fromEvent } = require('rxjs');
-const { map } = require('rxjs/operators');
+const { map, debounceTime } = require('rxjs/operators');
 // const cv = require('opencv4nodejs');
 
 class DroneManager {
