@@ -36,6 +36,10 @@ class SimulatorManager {
 		}, interval);
 
 	}
+
+	static simulateCommands() {
+
+	}
 }
 
 module.exports = SimulatorManager;

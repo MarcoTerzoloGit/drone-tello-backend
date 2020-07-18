@@ -33,7 +33,7 @@ class CommandsManager {
     }
 
     console.log('[COMMAND] sending...', command)
-    return this.commandsQueue$.next(command);
+    this.commandsQueue$.next(command);
   }
 }
 

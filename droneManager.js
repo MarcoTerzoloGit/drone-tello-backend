@@ -1,7 +1,7 @@
 const dgram = require('dgram');
 const { DronePorts, HOST  } = require('./constants');
-const { parseMessage } = require('./utils');
-const { fromEvent } = require('rxjs');
+const { parseMessage, applyCalibration } = require('./utils');
+const { fromEvent, BehaviorSubject } = require('rxjs');
 const { map, debounceTime } = require('rxjs/operators');
 // const cv = require('opencv4nodejs');
 
@@ -10,6 +10,7 @@ class DroneManager {
 		this.initCommandsConnection()
 		this.initStatusConnection()
 		// this.initStreamingConnection()
+		this.droneConnected$ = new BehaviorSubject(false);
 	}
 
   initCommandsConnection() {
@@ -20,6 +21,9 @@ class DroneManager {
 		this.droneCommands.on('listening', () => {
 			const address = this.droneCommands.address();
 			console.log(`[UDP] listening on ${address.address}:${address.port}`);
+
+			// Notify drone is connected so we can start listen tostats
+			this.droneConnected$.next(true);
 		});
 
 		// Debug feedback from drone
@@ -43,23 +47,16 @@ class DroneManager {
 
 	// TODO: need throttle
 	getStatusEvents() {
-		// this.droneStatus.on('message', message => {
-		// 	const parsedMessage = parseMessage(`${message}`);
-		// 	console.log('[DRONE] stats:', parsedMessage);
-		// 	socketInstance.emit('stats', parsedMessage);
-		// })
-
 		return (fromEvent(this.droneStatus, 'message')
 						.pipe(
-							map(message => parseMessage(`${message}`))
+							map(message => parseMessage(`${message}`)),
+							map(parsedMessage => applyCalibration(parsedMessage))
 						))
 
 	}
 
 	getStreamingEvents() {
-		// RETURn OBSERVABLE
-
-		this.droneStreaming.on('message', (streaming) => console.log(`[DRONE] streaming >>> `)); // ${streaming}
+		// this.droneStreaming.on('message', (streaming) => console.log(`[DRONE] streaming >>> `)); // ${streaming}
 
 		return fromEvent(this.droneStreaming, 'message')
 

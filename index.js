@@ -7,7 +7,7 @@ const io = require('socket.io')(server);
 // Utils
 const { PORT } = require('./constants');
 const { fromEvent } = require('rxjs');
-const { first, concatMap } = require('rxjs/operators')
+const { first, concatMap, switchMap } = require('rxjs/operators')
 
 // Managers
 const SimulatorManager = require('./simulatorManager');
@@ -35,24 +35,16 @@ const droneServiceApp = () => {
       commandsInstance.pushToQueue(command);
     })
 
-    setTimeout(() => {
-      droneInstance.getStatusEvents()
-      .subscribe(stats => {
-        console.log('[SOCKET] emitting...')
-        io.emit('stats', stats)
-      })
+  droneInstance.droneConnected$
+    .pipe(switchMap(() => droneInstance.getStatusEvents()))
+    .subscribe(stats => {
+      console.log('[SOCKET] emitting...')
+      io.emit('stats', stats)
+    })
 
-      // droneInstance.getStreamingEvents()
-      //   .subscribe(stream => console.log('[DRONE] stream:', stream))
-    
-      // react to prepared commands and send
-      commandsInstance.commandsQueue$
-        .subscribe(
-          currentCommand => droneInstance.sendCommand(currentCommand)
-        )
-    }, 10000)
-
-    
+  droneInstance.droneConnected$
+    .pipe(switchMap(() => commandsInstance.commandsQueue$))
+    .subscribe(currentCommand => droneInstance.sendCommand(currentCommand))  
 
   server.listen(PORT, () => console.log(`[SERVER] listening on port ${PORT}`));
 }
